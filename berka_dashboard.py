@@ -251,17 +251,42 @@ with st.sidebar:
 # SHARED CHART LAYOUT HELPER
 # Produces clean white charts that work in both light and dark mode
 # ─────────────────────────────────────────────────────────────
-def chart_layout(height=360, **kwargs):
-    base = dict(
-        height=height,
-        margin=dict(t=20, b=20, l=10, r=10),
-        plot_bgcolor="white",
-        paper_bgcolor="white",
-        font=dict(color="#1A1A1A"),
-        showlegend=False,
-    )
-    base.update(kwargs)
-    return base
+st.markdown('<div class="section-header">Loan Amount vs Last Transaction Amount</div>',
+                unsafe_allow_html=True)
+    fig3 = go.Figure()
+    for status, symbol, label in [
+        ("D", "diamond", "Status D: Running, In Trouble"),
+        ("B", "circle",  "Status B: Finished, Unpaid")
+    ]:
+        subset = active_df[active_df["loan_status"] == status]
+        if subset.empty:
+            continue
+        s_colors = [RED if r == "HIGH RISK: Large withdrawal on bad loan account"
+                    else TEAL for r in subset["risk_flag"]]
+        fig3.add_trace(go.Scatter(
+            x=subset["loan_amount"], y=subset["last_txn_amount"],
+            mode="markers", name=label,
+            marker=dict(color=s_colors, size=14, symbol=symbol,
+                        line=dict(width=1, color="white")),
+            text=subset["account_id"].astype(str),
+            hovertemplate=("<b>Account %{text}</b><br>"
+                           "Loan: %{x:,.0f}<br>"
+                           "Last Txn: %{y:,.0f}<extra></extra>")
+        ))
+    fig3.update_layout(**chart_layout(
+        height=320, showlegend=True,
+        xaxis=dict(gridcolor="#E0E0E0", title="Loan Amount",
+                   color="#1A1A1A", title_font=dict(color="#1A1A1A"),
+                   tickfont=dict(color="#1A1A1A")),
+        yaxis=dict(gridcolor="#E0E0E0", title="Last Transaction Amount",
+                   color="#1A1A1A", title_font=dict(color="#1A1A1A"),
+                   tickfont=dict(color="#1A1A1A")),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02,
+                    font=dict(color="#1A1A1A", size=12),
+                    bgcolor="rgba(255,255,255,0.9)",
+                    bordercolor="#E0E0E0", borderwidth=1)
+    ))
+    st.plotly_chart(fig3, use_container_width=True)
 
 
 # ─────────────────────────────────────────────────────────────
