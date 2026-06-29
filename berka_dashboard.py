@@ -125,25 +125,27 @@ q1, q2, q3, q4 = load_data()
 # CHART LAYOUT HELPER
 # Forces dark text on white background — readable in both light and dark mode
 def chart_layout(height=360, **kwargs):
-    axis_style = dict(
-        color="#1A1A1A",
-        tickfont=dict(color="#1A1A1A", size=11),
-        title_font=dict(color="#1A1A1A", size=12),
-        gridcolor="#E8E8E8"
-    )
+    dark = "#1A1A1A"
+
+    # Force dark text on every axis passed in kwargs
+    for axis_key in ["xaxis", "yaxis"]:
+        if axis_key in kwargs:
+            ax = kwargs[axis_key]
+            ax.setdefault("color",       dark)
+            ax.setdefault("tickfont",    dict(color=dark, size=12))
+            ax.setdefault("title_font",  dict(color=dark, size=13))
+            ax.setdefault("gridcolor",   "#E8E8E8")
+            ax.setdefault("linecolor",   "#CCCCCC")
+            kwargs[axis_key] = ax
+
     base = dict(
         height=height,
-        margin=dict(t=20, b=20, l=10, r=10),
+        margin=dict(t=30, b=40, l=60, r=20),
         plot_bgcolor="white",
         paper_bgcolor="white",
-        font=dict(color="#1A1A1A", family="Arial, sans-serif"),
+        font=dict(color=dark, family="Arial, sans-serif", size=12),
         showlegend=False,
     )
-    # Apply axis style defaults if xaxis/yaxis passed
-    for axis in ["xaxis", "yaxis"]:
-        if axis in kwargs:
-            merged = {**axis_style, **kwargs[axis]}
-            kwargs[axis] = merged
     base.update(kwargs)
     return base
 
